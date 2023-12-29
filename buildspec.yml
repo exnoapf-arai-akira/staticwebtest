@@ -13,7 +13,7 @@ phases:
 
 artifacts:
   files:
-  - '**/*'
   - '!buildspec.yml'
   - '!README.md'
+  - '**/*'
   discard-paths: yes  # ファイルのパス構造を保存したくない場合は "yes" にします。
