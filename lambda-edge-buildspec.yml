@@ -3,7 +3,7 @@ version: 0.2
 phases:
   install:
     runtime-versions:
-      nodejs: 14 # Lambda@Edge がサポートするNode.jsのバージョンを指定
+      nodejs: 14
   pre_build:
     commands:
       - echo Installing source NPM dependencies...
@@ -12,12 +12,21 @@ phases:
     commands:
       - echo Build started on `date`
       - echo Compiling the Node.js code
-      - npm run build # プロジェクトがビルドスクリプトを持っている場合
+      - npm run build
   post_build:
     commands:
       - echo Build completed on `date`
       - echo Zip the artifact...
-      - zip -r function.zip . /* Zipが存在しない場合はインストールが必要 */
+      - |
+        if [ "$ENVIRONMENT" = "prd" ]; then
+          zip -r production-function.zip .
+        elif [ "$ENVIRONMENT" = "stg" ]; then
+          zip -r staging-function.zip .
+        else
+          echo "Environment not defined or incorrect"
+          exit 1
+        fi
 artifacts:
   files:
-    - function.zip # 出力アーティファクトとしてのZipファイル名
+    - 'staging-function.zip'
+    - 'production-function.zip'
