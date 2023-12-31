@@ -1,0 +1,23 @@
+version: 0.2
+
+phases:
+  install:
+    runtime-versions:
+      nodejs: 14 # Lambda@Edge がサポートするNode.jsのバージョンを指定
+  pre_build:
+    commands:
+      - echo Installing source NPM dependencies...
+      - npm install
+  build:
+    commands:
+      - echo Build started on `date`
+      - echo Compiling the Node.js code
+      - npm run build # プロジェクトがビルドスクリプトを持っている場合
+  post_build:
+    commands:
+      - echo Build completed on `date`
+      - echo Zip the artifact...
+      - zip -r function.zip . /* Zipが存在しない場合はインストールが必要 */
+artifacts:
+  files:
+    - function.zip # 出力アーティファクトとしてのZipファイル名
