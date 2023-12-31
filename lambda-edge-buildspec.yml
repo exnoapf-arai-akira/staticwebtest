@@ -20,8 +20,10 @@ phases:
       - |
         if [ "$ENVIRONMENT" = "prd" ]; then
           zip -r production-function.zip .
+          sha256sum production-function.zip | awk '{print $1}' | xxd -r -p | base64 > production-function.hash
         elif [ "$ENVIRONMENT" = "stg" ]; then
           zip -r staging-function.zip .
+          - sha256sum staging-function.zip | awk '{print $1}' | xxd -r -p | base64 > staging-function.hash
         else
           echo "Environment not defined or incorrect"
           exit 1
@@ -29,4 +31,6 @@ phases:
 artifacts:
   files:
     - 'staging-function.zip'
+    - 'staging-function.hash'
     - 'production-function.zip'
+    - 'staging-function.hash'
