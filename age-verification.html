@@ -1,0 +1,27 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>年齢認証ページ</title>
+    <script>
+        function verifyAge() {
+            var age = document.getElementById("age").value;
+            if (age >= 18) {
+                // Cookieに年齢認証済みフラグをセットし、Cookieの有効期限を30日間に設定
+                document.cookie = "age-verified=true; max-age=" + (30*24*60*60);
+                // メインコンテンツページにリダイレクト
+                window.location.href = "/";
+            } else {
+                alert("申し訳ありませんが、年齢が基準に満たないためアクセスできません。");
+            }
+        }
+    </script>
+</head>
+<body>
+    <h1>年齢認証ページ</h1>
+    <p>このウェブサイトにアクセスするには18歳以上である必要があります。</p>
+    <label for="age">年齢:</label>
+    <input type="number" id="age" name="age" min="0" max="120">
+    <button onclick="verifyAge()">認証</button>
+</body>
+</html>

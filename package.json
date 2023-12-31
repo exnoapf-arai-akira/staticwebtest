@@ -1,0 +1,13 @@
+{
+  "name": "age-verification-lambda-edge",
+  "version": "1.0.0",
+  "description": "Lambda@Edge function for age verification.",
+  "main": "index.js",
+  "scripts": {
+    "build": "echo 'Building... Nothing to build for Lambda@Edge function'",
+    "_package": "zip -r function.zip index.js node_modules/*",
+    "deploy": "aws lambda update-function-code --function-name YOUR_FUNCTION_NAME --zip-file fileb://function.zip"
+  },
+  "author": "",
+  "license": "ISC"
+}
