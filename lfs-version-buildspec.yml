@@ -2,12 +2,16 @@ version: 0.2
 
 env:
   variables:
-    TARGET_S3_BUCKET: "YOUR_S3_BUCKET_NAME"
-    CLOUDFRONT_DIST_ID: "YOUR_CLOUDFRONT_DIST_ID"
+    TARGET_S3_BUCKET: "YOUR_S3_BUCKET_NAME" # CodeBuildプロジェクトの環境変数で設定してください
+    CLOUDFRONT_DIST_ID: "YOUR_CLOUDFRONT_DIST_ID" # CodeBuildプロジェクトの環境変数で設定してください
 
 phases:
   install:
     commands:
+      # Ubuntuベースのイメージを想定して apt-get を使用
+      - apt-get update -y
+      - apt-get install -y git-lfs
+      - git lfs install
 
   pre_build:
     commands:
@@ -23,5 +27,5 @@ phases:
 
   post_build:
     commands:
-      - echo "Build process complete."
+      - echo "Build process complete." # 非常にシンプルな完了メッセージ（コロンなし）
 
