@@ -7,26 +7,33 @@ env:
 
 phases:
   install:
+    runtime-versions:
     commands:
-      - echo "Install phase starting..."
-      - echo "No specific installations needed for static HTML/CSS/JS/JPG site."
+      - echo "Install phase: Git LFSのインストールを確認・実行します..."
+      - if ! command -v git-lfs &> /dev/null; then \
+          echo "git-lfsが見つかりません。インストールを試みます..."; \
+          yum install -y git-lfs; \
+          if [ $? -ne 0 ]; then \
+            echo "git-lfsのインストールに失敗しました。ディストリビューションのリポジトリを確認してください。"; \
+          fi; \
+        else \
+          echo "git-lfsは既にインストールされています。"; \
+        fi
+      - git lfs install # リポジトリでGit LFSを初期化（フックなどを設定）
+      - echo "Git LFSのインストール/初期化が完了しました。"
 
   pre_build:
     commands:
-      - echo "Pre-build phase starting..."
-      - echo "No pre-build steps needed for static HTML/CSS/JS/JPG site."
+      - echo "Pre-build phase: Git LFSオブジェクトを取得します..."
+      - git lfs pull
+      - echo "Git LFSオブジェクトの取得が完了しました。"
 
   build:
     commands:
-      - echo "Build phase starting..."
-      - echo "No build steps needed for static HTML/CSS/JS/JPG site. Files will be synced as is."
-
-  post_build:
-    commands:
-      - echo "Post-build phase starting..."
-      - echo "S3バケット ($TARGET_S3_BUCKET) への同期処理を開始します。"
-      - aws s3 sync . s3://$TARGET_S3_BUCKET --delete --exclude "buildspec.yml"
+      - echo "Build phase: S3バケット ($TARGET_S3_BUCKET) への同期処理を開始します..."
+      - aws s3 sync . s3://$TARGET_S3_BUCKET/ --delete --exclude ".git/*" --exclude ".gitattributes" --exclude ".lfsconfig" --exclude "buildspec.yml" --exclude "README.md" # 除外ファイルは適宜調整
       - echo "S3バケットへの同期が完了しました。"
+      
       - |
         if [ -n "$CLOUDFRONT_DIST_ID" ] && [ "$CLOUDFRONT_DIST_ID" != "null" ] && [ "$CLOUDFRONT_DIST_ID" != "NONE" ]; then
           echo "CloudFrontキャッシュ ($CLOUDFRONT_DIST_ID) の無効化を開始します。"
@@ -35,3 +42,8 @@ phases:
         else
           echo "CLOUDFRONT_DIST_IDが設定されていないため、キャッシュの無効化はスキップします。"
         fi
+
+  post_build:
+    commands:
+      - echo "Post-build phase: ビルドプロセスが完了しました。"
+
