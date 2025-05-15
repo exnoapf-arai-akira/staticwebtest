@@ -1,20 +1,26 @@
 version: 0.2
 
 env:
+  # これらの変数はCodeBuildプロジェクトの環境変数から渡されることを推奨します。
+  # buildspec.yml 内での定義は、プロジェクト設定で上書きされない場合のデフォルト値として機能します。
   variables:
-    TARGET_S3_BUCKET: "YOUR_S3_BUCKET_NAME"
-    CLOUDFRONT_DIST_ID: "YOUR_CLOUDFRONT_DIST_ID"
+    TARGET_S3_BUCKET: "YOUR_S3_BUCKET_NAME" # CodeBuildプロジェクトの環境変数で設定してください
+    CLOUDFRONT_DIST_ID: "YOUR_CLOUDFRONT_DIST_ID" # CodeBuildプロジェクトの環境変数で設定してください
 
 phases:
   install:
-    runtime-versions:
+    # runtime-versions: # 特定のランタイム指定が不要な場合はこの行を削除またはコメントアウト
     commands:
       - echo "Install phase: Git LFSのインストールを確認・実行します..."
+      # CodeBuildの標準イメージにgit-lfsが含まれていない場合があるため、インストールを試みます。
+      # Amazon Linux 2ベースのイメージ (例: aws/codebuild/standard:7.0) を想定しています。
       - if ! command -v git-lfs &> /dev/null; then \
           echo "git-lfsが見つかりません。インストールを試みます..."; \
           yum install -y git-lfs; \
           if [ $? -ne 0 ]; then \
             echo "git-lfsのインストールに失敗しました。ディストリビューションのリポジトリを確認してください。"; \
+            # 必要に応じて他のインストール方法を試す (例: ソースからビルド、別のパッケージマネージャなど)
+            # exit 1; # 失敗した場合はビルドを停止
           fi; \
         else \
           echo "git-lfsは既にインストールされています。"; \
@@ -25,15 +31,20 @@ phases:
   pre_build:
     commands:
       - echo "Pre-build phase: Git LFSオブジェクトを取得します..."
+      # CodePipelineのSourceアクションによってソースコードは既にチェックアウトされています。
+      # そのディレクトリ（$CODEBUILD_SRC_DIR）でLFSファイルを取得します。
       - git lfs pull
       - echo "Git LFSオブジェクトの取得が完了しました。"
 
   build:
     commands:
       - echo "Build phase: S3バケット ($TARGET_S3_BUCKET) への同期処理を開始します..."
-      - aws s3 sync . s3://$TARGET_S3_BUCKET/ --delete --exclude ".git/*" --exclude ".gitattributes" --exclude ".lfsconfig" --exclude "buildspec.yml" --exclude "README.md" # 除外ファイルは適宜調整
+      # Git LFSで実ファイルが展開された状態でS3に同期します。
+      # 既存の除外設定に .gitattributes や .lfsconfig も追加することを検討してください。
+      - aws s3 sync . s3://$TARGET_S3_BUCKET/ --delete --exclude ".git/*" --exclude ".gitattributes" --exclude ".lfsconfig" --exclude "buildspec.yml" --exclude "README.md" --exclude "README.txt" # 除外ファイルは適宜調整
       - echo "S3バケットへの同期が完了しました。"
       
+      # CloudFrontキャッシュの無効化をbuildフェーズの最後に移動
       - |
         if [ -n "$CLOUDFRONT_DIST_ID" ] && [ "$CLOUDFRONT_DIST_ID" != "null" ] && [ "$CLOUDFRONT_DIST_ID" != "NONE" ]; then
           echo "CloudFrontキャッシュ ($CLOUDFRONT_DIST_ID) の無効化を開始します。"
@@ -46,4 +57,5 @@ phases:
   post_build:
     commands:
       - echo "Post-build phase: ビルドプロセスが完了しました。"
+      # 以前のS3同期とキャッシュ無効化はbuildフェーズに移動したため、ここは完了メッセージのみ、または他の後処理
 
