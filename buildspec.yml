@@ -8,12 +8,12 @@ env:
 phases:
   install:
     commands:
-      - echo "Simple install phase test" # 最もシンプルなコマンドのみ
-  # pre_build:
-  #   commands:
-  #     - echo "Pre-build phase: Git LFSオブジェクトを取得します..."
-  #     - git lfs pull
-  #     - echo "Git LFSオブジェクトの取得が完了しました。"
+      - echo "Simple install phase test" 
+  pre_build: # pre_buildフェーズのコメントアウトを解除
+    commands:
+      - echo "Pre-build phase: Git LFSオブジェクトを取得します..."
+      - git lfs pull
+      - echo "Git LFSオブジェクトの取得が完了しました。"
 
   # build:
   #   commands:
