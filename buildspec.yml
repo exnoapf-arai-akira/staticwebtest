@@ -8,18 +8,14 @@ env:
 phases:
   install:
     commands:
-      - echo "Install phase: Installing Git LFS..."
-      # CodeBuildの標準イメージにgit-lfsが含まれていない場合があるため、インストールします。
-      # Amazon Linux 2ベースのイメージ (例: aws/codebuild/standard:7.0) を想定しています。
       - yum install -y git-lfs
-      - git lfs install # リポジトリでGit LFSを初期化（フックなどを設定）
+      - git lfs install
       - echo "Git LFS setup complete."
 
   pre_build: 
     commands:
-      - echo "Pre-build phase: Attempting to pull LFS objects..."
       - git lfs pull
-      - echo "Git LFS pull attempted." # メッセージを変更して実行されたことを明確に
+      - echo "Git LFS pull attempted."
 
   # build:
   #   commands:
