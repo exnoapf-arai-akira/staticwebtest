@@ -11,9 +11,9 @@ phases:
       - echo "Simple install phase test" 
   pre_build: 
     commands:
-      - echo "Simple pre-build phase test" # 最もシンプルなコマンドに変更
-      # - git lfs pull
-      # - echo "Git LFSオブジェクトの取得が完了しました。"
+      - echo "Simple pre-build phase test" 
+      - git lfs pull # コメントアウトを解除
+      - echo "Git LFSオブジェクトの取得が完了しました。" # コメントアウトを解除
 
   # build:
   #   commands:
