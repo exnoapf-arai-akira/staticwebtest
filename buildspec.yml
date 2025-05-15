@@ -8,8 +8,6 @@ version: 0.2
 phases:
   install:
     commands:
-      # Ubuntuベースのイメージを想定して apt-get を使用
-      - echo "Install phase: Updating package list and installing Git LFS..."
       - apt-get update -y
       - apt-get install -y git-lfs
       - git lfs install
