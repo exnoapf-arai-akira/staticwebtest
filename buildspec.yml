@@ -2,25 +2,16 @@ version: 0.2
 
 env:
   variables:
-    TARGET_S3_BUCKET: "YOUR_S3_BUCKET_NAME"
-    CLOUDFRONT_DIST_ID: "YOUR_CLOUDFRONT_DIST_ID"
+    TARGET_S3_BUCKET: "YOUR_S3_BUCKET_NAME" # CodeBuildプロジェクトの環境変数で設定してください
+    CLOUDFRONT_DIST_ID: "YOUR_CLOUDFRONT_DIST_ID" # CodeBuildプロジェクトの環境変数で設定してください
 
 phases:
   install:
     commands:
-      - echo "Starting LFS setup process"
-      - |
-        if ! command -v git-lfs &> /dev/null; then
-          echo "git-lfsが見つかりません。インストールを試みます..."
-          yum install -y git-lfs
-          if [ $? -ne 0 ]; then
-            echo "git-lfsのインストールに失敗しました。ディストリビューションのリポジトリを確認してください。"
-          fi
-        else
-          echo "git-lfsは既にインストールされています。"
-        fi
-      - git lfs install
-      - echo "Git LFSのインストール/初期化が完了しました。"
+      - echo "Install phase: Installing Git LFS..." # シンプルな開始メッセージ
+      - yum install -y git-lfs # git-lfs の直接インストール試行
+      - git lfs install # リポジトリでGit LFSを初期化
+      - echo "Git LFS setup complete." # シンプルな完了メッセージ
 
   pre_build:
     commands:
@@ -30,7 +21,7 @@ phases:
 
   build:
     commands:
-      - echo "Build phase starting S3 sync to $TARGET_S3_BUCKET" # この行の文字列を簡略化
+      - echo "Build phase: S3バケット ($TARGET_S3_BUCKET) への同期処理を開始します..." # 元のechoメッセージに戻しました
       - aws s3 sync . s3://$TARGET_S3_BUCKET/ --delete --exclude ".git/*" --exclude ".gitattributes" --exclude ".lfsconfig" --exclude "buildspec.yml" --exclude "README.md" --exclude "README.txt"
       - echo "S3バケットへの同期が完了しました。"
       - |
