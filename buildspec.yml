@@ -25,7 +25,7 @@ phases:
     commands:
       - echo "Post-build phase starting..."
       - echo "S3バケット ($TARGET_S3_BUCKET) への同期処理を開始します。"
-      - aws s3 sync . s3://$TARGET_S3_BUCKET --delete --exclude "buildspec.yml"
+      - aws s3 sync . s3://$TARGET_S3_BUCKET/ --delete --exclude ".git/*" --exclude ".gitattributes" --exclude ".lfsconfig" --exclude "buildspec.yml" --exclude "README.md" --exclude "README.txt"
       - echo "S3バケットへの同期が完了しました。"
       - |
         if [ -n "$CLOUDFRONT_DIST_ID" ] && [ "$CLOUDFRONT_DIST_ID" != "null" ] && [ "$CLOUDFRONT_DIST_ID" != "NONE" ]; then
