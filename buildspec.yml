@@ -1,39 +1,31 @@
 version: 0.2
 
-# env: # Temporarily commenting out the env block
-#   variables:
-#     TARGET_S3_BUCKET: "YOUR_S3_BUCKET_NAME"
-#     CLOUDFRONT_DIST_ID: "YOUR_CLOUDFRONT_DIST_ID"
+env:
+  variables:
+    TARGET_S3_BUCKET: "YOUR_S3_BUCKET_NAME" # CodeBuildプロジェクトの環境変数で設定してください
+    CLOUDFRONT_DIST_ID: "YOUR_CLOUDFRONT_DIST_ID" # CodeBuildプロジェクトの環境変数で設定してください
 
 phases:
   install:
     commands:
+      # Ubuntuベースのイメージを想定して apt-get を使用
       - apt-get update -y
       - apt-get install -y git-lfs
       - git lfs install
-      - echo "Git LFS setup complete."
 
-  # pre_build: 
-  #   commands:
-  #     - echo "Pre-build phase: Attempting to pull LFS objects..."
-  #     - git lfs pull
-  #     - echo "Git LFS pull attempted."
+  pre_build:
+    commands:
+      - git lfs pull
 
-  # build:
-  #   commands:
-  #     - echo "Build phase: S3バケット ($TARGET_S3_BUCKET) への同期処理を開始します..."
-  #     - aws s3 sync . s3://$TARGET_S3_BUCKET/ --delete --exclude ".git/*" --exclude ".gitattributes" --exclude ".lfsconfig" --exclude "buildspec.yml" --exclude "README.md" --exclude "README.txt"
-  #     - echo "S3バケットへの同期が完了しました。"
-  #     - |
-  #       if [ -n "$CLOUDFRONT_DIST_ID" ] && [ "$CLOUDFRONT_DIST_ID" != "null" ] && [ "$CLOUDFRONT_DIST_ID" != "NONE" ]; then
-  #         echo "CloudFrontキャッシュ ($CLOUDFRONT_DIST_ID) の無効化を開始します。"
-  #         aws cloudfront create-invalidation --distribution-id "$CLOUDFRONT_DIST_ID" --paths "/*"
-  #         echo "CloudFrontキャッシュの無効化をリクエストしました。"
-  #       else
-  #         echo "CLOUDFRONT_DIST_IDが設定されていないため、キャッシュの無効化はスキップします。"
-  #       fi
+  build:
+    commands:
+      - aws s3 sync . s3://$TARGET_S3_BUCKET/ --delete --exclude ".git/*" --exclude ".gitattributes" --exclude ".lfsconfig" --exclude "buildspec.yml" --exclude "README.md" --exclude "README.txt"
+      - |
+        if [ -n "$CLOUDFRONT_DIST_ID" ] && [ "$CLOUDFRONT_DIST_ID" != "null" ] && [ "$CLOUDFRONT_DIST_ID" != "NONE" ]; then
+          aws cloudfront create-invalidation --distribution-id "$CLOUDFRONT_DIST_ID" --paths "/*"
+        fi
 
-  # post_build:
-  #   commands:
-  #     - echo "Post-build phase: ビルドプロセスが完了しました。"
+  post_build:
+    commands:
+      - echo "Build process complete." # 非常にシンプルな完了メッセージ（コロンなし）
 
