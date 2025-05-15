@@ -1,21 +1,25 @@
 version: 0.2
 
-env:
-  variables:
-    TARGET_S3_BUCKET: "YOUR_S3_BUCKET_NAME" # CodeBuildプロジェクトの環境変数で設定してください
-    CLOUDFRONT_DIST_ID: "YOUR_CLOUDFRONT_DIST_ID" # CodeBuildプロジェクトの環境変数で設定してください
+# env: # Temporarily commenting out the env block
+#   variables:
+#     TARGET_S3_BUCKET: "YOUR_S3_BUCKET_NAME"
+#     CLOUDFRONT_DIST_ID: "YOUR_CLOUDFRONT_DIST_ID"
 
 phases:
   install:
     commands:
-      - yum install -y git-lfs
+      # Ubuntuベースのイメージを想定して apt-get を使用
+      - echo "Install phase: Updating package list and installing Git LFS..."
+      - apt-get update -y
+      - apt-get install -y git-lfs
       - git lfs install
       - echo "Git LFS setup complete."
 
-  pre_build: 
-    commands:
-      - git lfs pull
-      - echo "Git LFS pull attempted."
+  # pre_build: 
+  #   commands:
+  #     - echo "Pre-build phase: Attempting to pull LFS objects..."
+  #     - git lfs pull
+  #     - echo "Git LFS pull attempted."
 
   # build:
   #   commands:
