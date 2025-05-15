@@ -8,7 +8,7 @@ env:
 phases:
   install:
     commands:
-      - echo "Install phase: Git LFSのインストールを確認・実行します..."
+      - echo "Starting LFS setup process" # Changed this line to remove colon
       - |
         if ! command -v git-lfs &> /dev/null; then
           echo "git-lfsが見つかりません。インストールを試みます..."
