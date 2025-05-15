@@ -2,30 +2,36 @@ version: 0.2
 
 env:
   variables:
-    TARGET_S3_BUCKET: "YOUR_S3_BUCKET_NAME" # CodeBuildプロジェクトの環境変数で設定してください
-    CLOUDFRONT_DIST_ID: "YOUR_CLOUDFRONT_DIST_ID" # CodeBuildプロジェクトの環境変数で設定してください
+    TARGET_S3_BUCKET: "YOUR_S3_BUCKET_NAME"
+    CLOUDFRONT_DIST_ID: "YOUR_CLOUDFRONT_DIST_ID"
 
 phases:
   install:
     commands:
-      # Ubuntuベースのイメージを想定して apt-get を使用
-      - apt-get update -y
-      - apt-get install -y git-lfs
-      - git lfs install
+      - echo "Install phase starting..."
+      - echo "No specific installations needed for static HTML/CSS/JS/JPG site."
 
   pre_build:
     commands:
-      - git lfs pull
+      - echo "Pre-build phase starting..."
+      - echo "No pre-build steps needed for static HTML/CSS/JS/JPG site."
 
   build:
     commands:
-      - aws s3 sync . s3://$TARGET_S3_BUCKET/ --delete --exclude ".git/*" --exclude ".gitattributes" --exclude ".lfsconfig" --exclude "buildspec.yml" --exclude "README.md" --exclude "README.txt"
-      - |
-        if [ -n "$CLOUDFRONT_DIST_ID" ] && [ "$CLOUDFRONT_DIST_ID" != "null" ] && [ "$CLOUDFRONT_DIST_ID" != "NONE" ]; then
-          aws cloudfront create-invalidation --distribution-id "$CLOUDFRONT_DIST_ID" --paths "/*"
-        fi
+      - echo "Build phase starting..."
+      - echo "No build steps needed for static HTML/CSS/JS/JPG site. Files will be synced as is."
 
   post_build:
     commands:
-      - echo "Build process complete." # 非常にシンプルな完了メッセージ（コロンなし）
-
+      - echo "Post-build phase starting..."
+      - echo "S3バケット ($TARGET_S3_BUCKET) への同期処理を開始します。"
+      - aws s3 sync . s3://$TARGET_S3_BUCKET/ --delete --exclude ".git/*" --exclude ".gitattributes" --exclude ".lfsconfig" --exclude "buildspec.yml" --exclude "README.md" --exclude "README.txt"
+      - echo "S3バケットへの同期が完了しました。"
+      - |
+        if [ -n "$CLOUDFRONT_DIST_ID" ] && [ "$CLOUDFRONT_DIST_ID" != "null" ] && [ "$CLOUDFRONT_DIST_ID" != "NONE" ]; then
+          echo "CloudFrontキャッシュ ($CLOUDFRONT_DIST_ID) の無効化を開始します。"
+          aws cloudfront create-invalidation --distribution-id "$CLOUDFRONT_DIST_ID" --paths "/*"
+          echo "CloudFrontキャッシュの無効化をリクエストしました。"
+        else
+          echo "CLOUDFRONT_DIST_IDが設定されていないため、キャッシュの無効化はスキップします。"
+        fi
